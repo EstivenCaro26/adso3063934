@@ -107,68 +107,68 @@
         </section>
     </main>
     <script src="JS/jquery-3.7.1.min.js"></script>
-    <script>
-        const totalCards = 12;
-        const cards = [];
-        let selectedCards = [];
-        let valuesUsed = [];
-        let currentMove = 0;
-        let currentAttempts = 0;
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const totalCards = 12;
+    const cards = [];
+    let selectedCards = [];
+    let valuesUsed = [];
+    let currentMove = 0;
+    let currentAttempts = 0;
 
-        let cardTemplate = `<div class="card"><div class="back"></div><div class="face"></div></div>`;
+    let cardTemplate = `<div class="card"><div class="back"></div><div class="face"></div></div>`;
 
-        function activate(e) {
-            if (currentMove < 2) {
+    function activate(e) {
+        if (currentMove < 2) {
+            const $target = $(e.target).closest('.card');
+            
+            if (!selectedCards[0] || selectedCards[0][0] !== $target[0]) {
+                $target.addClass('active');
+                selectedCards.push($target);
 
-                if (!selectedCards[0] || selectedCards[0] !== e.target) {
-                    e.target.classList.add('active');
-                    selectedCards.push(e.target);
+                if (++currentMove == 2) {
+                    currentAttempts++;
+                    $('#stats').html(currentAttempts + ' intentos');
 
-                    if (++currentMove == 2) {
-
-                        currentAttempts++;
-                        document.querySelector('#stats').innerHTML = currentAttempts + 'intentos';
-
-                        if (selectedCards[0].querySelectorAll('.face')[0].innerHTML == selectedCards[1].querySelectorAll('.face')[0].innerHTML) {
+                    if (selectedCards[0].find('.face').html() == selectedCards[1].find('.face').html()) {
+                        selectedCards = [];
+                        currentMove = 0;
+                    }
+                    else {
+                        setTimeout(() => {
+                            selectedCards[0].removeClass('active');
+                            selectedCards[1].removeClass('active');
                             selectedCards = [];
                             currentMove = 0;
-                        }
-                        else {
-                            setTimeout(() => {
-                                selectedCards[0].classList.remove('active');
-                                selectedCards[1].classList.remove('active');
-                                selectedCards = [];
-                                currentMove = 0;
-                            }, 600);
-                        }
+                        }, 600);
                     }
                 }
-
             }
         }
+    }
 
-        function randomValue() {
-            let rnd = Math.floor(Math.random() * totalCards * 0.5);
-            let values = valuesUsed.filter(value => value === rnd);
-            if (values.length < 2) {
-                valuesUsed.push(rnd);
-            }
-            else {
-                randomValue();
-            }
+    function randomValue() {
+        let rnd = Math.floor(Math.random() * totalCards * 0.5);
+        let values = valuesUsed.filter(value => value === rnd);
+        if (values.length < 2) {
+            valuesUsed.push(rnd);
         }
-
-        for (let i = 0; i < totalCards; i++) {
-            let div = document.createElement('div');
-            div.innerHTML = cardTemplate;
-            cards.push(div);
-            document.querySelector('#game').append(cards[i]);
+        else {
             randomValue();
-            cards[i].querySelectorAll('.face')[0].innerHTML = valuesUsed[i];
-            cards[i].querySelectorAll('.card')[0].addEventListener('click', activate);
         }
+    }
 
-    </script>
+    $(document).ready(function() {
+        for (let i = 0; i < totalCards; i++) {
+            let $div = $(cardTemplate);
+            cards.push($div);
+            $('#game').append($div);
+            randomValue();
+            $div.find('.face').html(valuesUsed[i]);
+            $div.on('click', activate);
+        }
+    });
+</script>
 </body>
 
 </html>
