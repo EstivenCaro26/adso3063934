@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokédex</title>
+  <style>
+   /* Fondo general y estructura base */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #ff0000 0%, #fcd116 100%);
+  color: #333;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Contenedor principal */
+.container {
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+}
+
+/* Título */
+h1 {
+  font-size: 2.5em;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Campo de búsqueda */
+input[type="text"] {
+  padding: 10px;
+  font-size: 16px;
+  width: 70%;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+input[type="text"]:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Botón de búsqueda */
+button {
+  padding: 10px 15px;
+  font-size: 16px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #c0392b;
+}
+
+/* Tarjeta del Pokémon */
+.card {
+  background-color: #f8f8f8;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  margin-top: 25px;
+  transition: 0.3s ease;
+}
+
+.card img {
+  width: 150px;
+  height: 150px;
+}
+
+.card h2 {
+  margin: 10px 0;
+  font-size: 24px;
+  color: #2c3e50;
+}
+
+.card p {
+  margin: 6px 0;
+  font-size: 16px;
+}
+
+/* Ocultar */
+.hidden {
+  display: none;
+}
+
+/* Mensaje de error */
+#error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* Tipos de Pokémon con estilos únicos */
+.type-fire {
+  color: #e25822;
+  font-weight: bold;
+}
+
+.type-water {
+  color: #0077be;
+  font-weight: bold;
+}
+
+.type-grass {
+  color: #3cb371;
+  font-weight: bold;
+}
+
+.type-electric {
+  color: #f4d03f;
+  font-weight: bold;
+}
+
+.type-psychic {
+  color: #c71585;
+  font-weight: bold;
+}
+
+.type-ice {
+  color: #00ced1;
+  font-weight: bold;
+}
+
+.type-ground {
+  color: #964b00;
+  font-weight: bold;
+}
+
+.type-rock {
+  color: #8b4513;
+  font-weight: bold;
+}
+
+.type-dragon {
+  color: #6a5acd;
+  font-weight: bold;
+}
+
+.type-dark {
+  color: #333;
+  font-weight: bold;
+}
+
+.type-fairy {
+  color: #ee99ac;
+  font-weight: bold;
+}
+
+.type-steel {
+  color: #a8a8a8;
+  font-weight: bold;
+}
+
+.type-flying {
+  color: #87ceeb;
+  font-weight: bold;
+}
+
+.type-bug {
+  color: #9acd32;
+  font-weight: bold;
+}
+
+.type-ghost {
+  color: #6b5b95;
+  font-weight: bold;
+}
+
+.type-poison {
+  color: #a040a0;
+  font-weight: bold;
+}
+
+.type-normal {
+  color: #a8a878;
+  font-weight: bold;
+}
+
+/* Responsive */
+@media screen and (max-width: 480px) {
+  .container {
+    width: 90%;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pokédex</h1>
+    <input type="text" id="search" placeholder="Nombre o número..." />
+    <button onclick="getPokemon()">Buscar</button>
+    <div id="pokemon-card" class="card hidden">
+      <img id="pokemon-img" />
+      <h2 id="pokemon-name"></h2>
+      <p id="pokemon-id"></p>
+      <p id="pokemon-types"></p>
+      <p id="pokemon-weight"></p>
+      <p id="pokemon-height"></p>
+    </div>
+    <p id="error-message"></p>
+  </div>
+  <script src="script.js"></script>
+  <script>
+   async function getPokemon() {
+  const nameOrId = document.getElementById("search").value.trim().toLowerCase();
+  const card = document.getElementById("pokemon-card");
+  const errorMessage = document.getElementById("error-message");
+
+  // Validar entrada vacía
+  if (!nameOrId) {
+    errorMessage.textContent = "Por favor ingresa un nombre o número.";
+    card.classList.add("hidden");
+    return;
+  }
+
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${nameOrId}`);
+    if (!res.ok) throw new Error("Pokémon no encontrado.");
+
+    const data = await res.json();
+
+    // Mostrar imagen del sprite frontal
+    document.getElementById("pokemon-img").src = data.sprites.front_default;
+
+    // Mostrar nombre en mayúsculas
+    document.getElementById("pokemon-name").textContent = data.name.toUpperCase();
+
+    // Mostrar ID (#000)
+    document.getElementById("pokemon-id").textContent = `#${data.id}`;
+
+    // Tipos de Pokémon con clases por tipo
+    const types = data.types.map(t => {
+      const typeName = t.type.name;
+      return `<span class="type-${typeName}">${typeName}</span>`;
+    }).join(", ");
+    document.getElementById("pokemon-types").innerHTML = "Tipo: " + types;
+
+    // Peso y altura convertidos a unidades normales
+    document.getElementById("pokemon-weight").textContent = `Peso: ${data.weight / 10} kg`;
+    document.getElementById("pokemon-height").textContent = `Altura: ${data.height / 10} m`;
+
+    // Mostrar tarjeta y ocultar error
+    card.classList.remove("hidden");
+    errorMessage.textContent = "";
+
+  } catch (error) {
+    card.classList.add("hidden");
+    errorMessage.textContent = error.message;
+  }
+}
+
+
+  </script>
+</body>
+</html>
